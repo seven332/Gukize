@@ -16,8 +16,14 @@
 
 package com.hippo.gukize.example;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+
+import com.hippo.gukize.GukizeView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,5 +31,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ListView listView = (ListView) findViewById(R.id.list_view);
+        listView.setAdapter(new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return 1000;
+            }
+
+            @Override
+            public Object getItem(int position) {
+                return null;
+            }
+
+            @Override
+            public long getItemId(int position) {
+                return 0;
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = new GukizeView(MainActivity.this);
+                    convertView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 512));
+                }
+                GukizeView image = (GukizeView) convertView;
+                image.load("gif", "https://s3.amazonaws.com/giphygifs/media/4aBQ9oNjgEQ2k/giphy.gif");
+                return convertView;
+            }
+        });
     }
 }
