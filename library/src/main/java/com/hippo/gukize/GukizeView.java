@@ -304,7 +304,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     /**
      * Wrap loaded drawable to add effect.
      */
-    protected Drawable wrapDrawable(Drawable drawable, @Conaco.Source int source) {
+    @NonNull
+    protected Drawable wrapDrawable(@NonNull Drawable drawable, @Conaco.Source int source) {
         // TODO If no wait and source disk, TRANSPARENT only
         // TODO not TRANSPARENT for animated image
         if (source != Conaco.SOURCE_MEMORY) {
@@ -322,14 +323,15 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     /**
      * Must return what {@link #wrapDrawable(Drawable, int)} provide.
      */
-    protected Drawable unwrapDrawable(Drawable drawable) {
+    @NonNull
+    protected Drawable unwrapDrawable(@NonNull Drawable drawable) {
         if (drawable instanceof TransitionDrawable) {
             TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
             if (transitionDrawable.getNumberOfLayers() == 2) {
                 return transitionDrawable.getDrawable(1);
             }
         }
-        return null;
+        return drawable;
     }
 
     private ImageDrawable getLoadedImageDrawable() {
@@ -339,7 +341,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             if (drawable instanceof ImageDrawable) {
                 return (ImageDrawable) drawable;
             } else {
-                throw new IllegalStateException("unwrapDrawable() must return ImageDrawable");
+                throw new IllegalStateException("unwrapDrawable() must return ImageDrawable, " +
+                        "but it is " + (drawable != null ? drawable.getClass().getName() : "null"));
             }
         } else {
             return null;
