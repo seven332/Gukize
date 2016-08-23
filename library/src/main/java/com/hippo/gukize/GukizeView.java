@@ -22,7 +22,9 @@ package com.hippo.gukize;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.support.annotation.IntDef;
@@ -303,9 +305,11 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
      * Wrap loaded drawable to add effect.
      */
     protected Drawable wrapDrawable(Drawable drawable, @Conaco.Source int source) {
+        // TODO If no wait and source disk, TRANSPARENT only
+        // TODO not TRANSPARENT for animated image
         if (source != Conaco.SOURCE_MEMORY) {
             Drawable[] layers = new Drawable[2];
-            layers[0] = mPlaceholderDrawable;
+            layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);;
             layers[1] = drawable;
             TransitionDrawable newDrawable = new TransitionDrawable(layers);
             newDrawable.startTransition(TIME_TRANSITION);
