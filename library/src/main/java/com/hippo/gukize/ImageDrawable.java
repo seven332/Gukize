@@ -131,6 +131,11 @@ public class ImageDrawable extends Drawable implements Animatable, Runnable {
     }
 
     private void setFrame(boolean resetOrNext, boolean unschedule, boolean animate) {
+        // Check recycled
+        if (mImageBitmap.isRecycled()) {
+            return;
+        }
+
         mAnimating = animate;
         if (resetOrNext) {
             mImageBitmap.advance();

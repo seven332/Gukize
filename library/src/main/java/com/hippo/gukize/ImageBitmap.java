@@ -116,6 +116,13 @@ public class ImageBitmap {
     }
 
     /**
+     * Return true if the ImageBitmap is recycled.
+     */
+    public boolean isRecycled() {
+        return mBitmap == null;
+    }
+
+    /**
      * Draw first frame to bitmap.
      */
     public void reset() {
@@ -136,7 +143,7 @@ public class ImageBitmap {
     }
 
     /**
-     * Get the Bitmap.
+     * Get the Bitmap, null if recycled.
      */
     @Nullable
     public Bitmap getBitmap() {
