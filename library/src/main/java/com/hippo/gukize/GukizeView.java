@@ -216,6 +216,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             clearRetry();
             mRetryType = retryType;
             applyRetry();
+        } else {
+            mRetryType = retryType;
         }
     }
 
