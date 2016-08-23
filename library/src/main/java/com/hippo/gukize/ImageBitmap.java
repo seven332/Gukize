@@ -111,7 +111,7 @@ public class ImageBitmap {
             if (!imageData.isReferenced()) {
                 imageData.recycle();
             }
-            mBitmap = null;
+            mImageRenderer = null;
         }
     }
 
