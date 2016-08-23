@@ -95,6 +95,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     public GukizeView(Context context) {
         super(context);
+        mConaco = Gukize.getConaco();
     }
 
     public GukizeView(Context context, AttributeSet attrs) {
