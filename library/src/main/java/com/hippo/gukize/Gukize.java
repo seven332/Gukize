@@ -36,7 +36,7 @@ public class Gukize {
 
     private static Conaco<ImageData> sConaco;
 
-    private static void init(Builder builder) {
+    public static void init(Builder builder) {
         if (sConaco != null) {
             throw new IllegalStateException("Can't init Gukize twice");
         }
