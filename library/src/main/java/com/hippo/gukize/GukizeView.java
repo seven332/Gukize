@@ -342,7 +342,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
                 return (ImageDrawable) drawable;
             } else {
                 throw new IllegalStateException("unwrapDrawable() must return ImageDrawable, " +
-                        "but it is " + (drawable != null ? drawable.getClass().getName() : "null"));
+                        "but it is " + drawable.getClass().getName());
             }
         } else {
             return null;
