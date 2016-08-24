@@ -44,7 +44,7 @@ public class Gukize {
         sConaco = builder.build();
     }
 
-    static Conaco<ImageData> getConaco() {
+    public static Conaco<ImageData> getConaco() {
         if (sConaco == null) {
             throw new IllegalStateException("Please call Gukize.init(build)");
         }

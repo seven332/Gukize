@@ -30,7 +30,7 @@ import com.hippo.image.ImageRenderer;
  * This class uses {@link Bitmap} to represent {@link ImageRenderer}.
  * Call {@link #getBitmap()} to get the bitmap.
  */
-public class ImageBitmap {
+class ImageBitmap {
 
     private final int mRatio;
     private final int mWidth;

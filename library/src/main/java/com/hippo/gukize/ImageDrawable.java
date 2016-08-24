@@ -33,7 +33,7 @@ import android.support.annotation.NonNull;
 
 // TODO mImageBitmap.reset() and mImageBitmap.advance() may
 // TODO take a long time. Put them to a new thread?
-public class ImageDrawable extends Drawable implements Animatable, Runnable {
+class ImageDrawable extends Drawable implements Animatable, Runnable {
 
     private final ImageBitmap mImageBitmap;
     private final Paint mPaint;
