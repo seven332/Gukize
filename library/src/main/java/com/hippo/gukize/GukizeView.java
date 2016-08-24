@@ -309,11 +309,11 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
      */
     @NonNull
     protected Drawable wrapDrawable(@NonNull Drawable drawable, @Conaco.Source int source) {
-        // TODO If no wait and source disk, TRANSPARENT only
-        // TODO not TRANSPARENT for animated image
-        if (source != Conaco.SOURCE_MEMORY) {
+        final boolean animated = drawable instanceof ImageDrawable
+                && ((ImageDrawable) drawable).getImageBitmap().isAnimated();
+        if (source != Conaco.SOURCE_MEMORY && !animated) {
             Drawable[] layers = new Drawable[2];
-            layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);;
+            layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);
             layers[1] = drawable;
             TransitionDrawable newDrawable = new TransitionDrawable(layers);
             newDrawable.startTransition(TIME_TRANSITION);
