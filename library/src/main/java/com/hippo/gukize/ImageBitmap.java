@@ -32,14 +32,14 @@ import com.hippo.image.ImageRenderer;
  */
 public class ImageBitmap {
 
-    private int mRatio;
-    private int mWidth;
-    private int mHeight;
-    private int mFormat;
-    private boolean mOpaque;
-    private int mFrameCount;
-    private int[] mDelayArray;
-    private int mByteCount;
+    private final int mRatio;
+    private final int mWidth;
+    private final int mHeight;
+    private final int mFormat;
+    private final boolean mOpaque;
+    private final int mFrameCount;
+    private final int[] mDelayArray;
+    private final int mByteCount;
 
     @Nullable
     private Bitmap mBitmap;
@@ -57,8 +57,8 @@ public class ImageBitmap {
             throw new IllegalStateException("ImageBitmap can only handle completed ImageData");
         }
 
-        int width = imageData.getWidth();
-        int height = imageData.getHeight();
+        final int width = imageData.getWidth();
+        final int height = imageData.getHeight();
         if (ratio > width || ratio > height) {
             throw new IllegalStateException("Ratio is too big");
         }
@@ -77,7 +77,7 @@ public class ImageBitmap {
         mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
 
         // Render first frame
-        ImageRenderer imageRenderer = imageData.createImageRenderer();
+        final ImageRenderer imageRenderer = imageData.createImageRenderer();
         imageRenderer.reset();
         imageRenderer.render(mBitmap, 0, 0, 0, 0, width, height, ratio, false, 0);
 
@@ -107,7 +107,7 @@ public class ImageBitmap {
             mImageRenderer.recycle();
             // If ImageData is not referenced, it must be not in memory cache.
             // Recycle it now to avoid memory leak.
-            ImageData imageData = mImageRenderer.getImageData();
+            final ImageData imageData = mImageRenderer.getImageData();
             if (!imageData.isReferenced()) {
                 imageData.recycle();
             }

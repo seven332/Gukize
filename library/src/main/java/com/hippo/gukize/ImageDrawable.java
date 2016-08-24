@@ -35,8 +35,8 @@ import android.support.annotation.NonNull;
 // TODO take a long time. Put them to a new thread?
 public class ImageDrawable extends Drawable implements Animatable, Runnable {
 
-    private ImageBitmap mImageBitmap;
-    private Paint mPaint;
+    private final ImageBitmap mImageBitmap;
+    private final Paint mPaint;
 
     /** Whether the drawable has an animation callback posted. */
     private boolean mRunning;

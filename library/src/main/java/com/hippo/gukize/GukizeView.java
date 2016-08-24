@@ -261,7 +261,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         mHasData = true;
 
         if (ViewCompat.isAttachedToWindow(this)) {
-            ConacoTask.Builder<ImageData> builder = new ConacoTask.Builder<>();
+            final ConacoTask.Builder<ImageData> builder = new ConacoTask.Builder<>();
             builder.unikery = this;
             builder.key = key;
             builder.url = url;
@@ -312,10 +312,10 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         final boolean animated = drawable instanceof ImageDrawable
                 && ((ImageDrawable) drawable).getImageBitmap().isAnimated();
         if (source != Conaco.SOURCE_MEMORY && !animated) {
-            Drawable[] layers = new Drawable[2];
+            final Drawable[] layers = new Drawable[2];
             layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);
             layers[1] = drawable;
-            TransitionDrawable newDrawable = new TransitionDrawable(layers);
+            final TransitionDrawable newDrawable = new TransitionDrawable(layers);
             newDrawable.startTransition(TIME_TRANSITION);
             return newDrawable;
         } else {
@@ -329,7 +329,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     @NonNull
     protected Drawable unwrapDrawable(@NonNull Drawable drawable) {
         if (drawable instanceof TransitionDrawable) {
-            TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
+            final TransitionDrawable transitionDrawable = (TransitionDrawable) drawable;
             if (transitionDrawable.getNumberOfLayers() == 2) {
                 return transitionDrawable.getDrawable(1);
             }
@@ -358,7 +358,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         }
 
         // Release old loaded image drawable
-        ImageDrawable oldImageDrawable = getLoadedImageDrawable();
+        final ImageDrawable oldImageDrawable = getLoadedImageDrawable();
         if (oldImageDrawable != null) {
             oldImageDrawable.getImageBitmap().recycle();
         }
@@ -426,10 +426,10 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             return;
         }
 
-        ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, 1));
+        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, 1));
         // Auto start
         imageDrawable.start();
-        Drawable drawable = wrapDrawable(imageDrawable, source);
+        final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
     }
 
@@ -446,7 +446,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public void start() {
-        ImageDrawable drawable = getLoadedImageDrawable();
+        final ImageDrawable drawable = getLoadedImageDrawable();
         if (drawable != null) {
             drawable.start();
         }
@@ -454,7 +454,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public void stop() {
-        ImageDrawable drawable = getLoadedImageDrawable();
+        final ImageDrawable drawable = getLoadedImageDrawable();
         if (drawable != null) {
             drawable.stop();
         }
@@ -462,7 +462,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public boolean isRunning() {
-        ImageDrawable drawable = getLoadedImageDrawable();
+        final ImageDrawable drawable = getLoadedImageDrawable();
         return drawable != null && drawable.isRunning();
     }
 
