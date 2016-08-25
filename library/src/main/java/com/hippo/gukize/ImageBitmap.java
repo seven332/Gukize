@@ -22,6 +22,7 @@ package com.hippo.gukize;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.hippo.image.ImageData;
 import com.hippo.image.ImageRenderer;
@@ -31,6 +32,8 @@ import com.hippo.image.ImageRenderer;
  * Call {@link #getBitmap()} to get the bitmap.
  */
 class ImageBitmap {
+
+    private static final String LOG_TAG = ImageBitmap.class.getSimpleName();
 
     private final int mRatio;
     private final int mWidth;
@@ -74,7 +77,19 @@ class ImageBitmap {
         for (int i = 0; i < mFrameCount; i++) {
             mDelayArray[i] = imageData.getDelay(i);
         }
-        mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+
+        try {
+            mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+        } catch (OutOfMemoryError e) {
+            // Out of memory. It looks like recycled.
+            Log.e(LOG_TAG, "Create Bitmap for ImageBitmap failed.", e);
+            // If ImageData is not referenced, it must be not in memory cache.
+            // Recycle it now to avoid memory leak.
+            if (!imageData.isReferenced()) {
+                imageData.recycle();
+            }
+            return;
+        }
 
         // Render first frame
         final ImageRenderer imageRenderer = imageData.createImageRenderer();
