@@ -49,11 +49,11 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     @IntDef({DRAWABLE_NONE, DRAWABLE_PLACEHOLDER, DRAWABLE_LOAD,
             DRAWABLE_FAILURE, DRAWABLE_CUSTOM})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DrawableState {}
+    private @interface DrawableState {}
 
     @IntDef({RETRY_TYPE_NONE, RETRY_TYPE_CLICK, RETRY_TYPE_LONG_CLICK})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface RetryType {}
+    public @interface RetryType {}
 
     private static final int DRAWABLE_NONE = 0;
     private static final int DRAWABLE_PLACEHOLDER = 1;
@@ -82,6 +82,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @RetryType
     private int mRetryType = RETRY_TYPE_NONE;
+    private int mMaxImageWidth = Integer.MAX_VALUE;
+    private int mMaxImageHeight = Integer.MAX_VALUE;
     @ScaleType
     private int mPlaceholderScaleType = SCALE_TYPE_FIT_CENTER;
     @ScaleType
@@ -115,6 +117,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.GukizeView, defStyleAttr, defStyleRes);
         setRetryType(a.getInt(R.styleable.GukizeView_gkz_retryType, RETRY_TYPE_NONE));
+        setMaxImageWidth(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageWidth, Integer.MAX_VALUE));
+        setMaxImageHeight(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageHeight, Integer.MAX_VALUE));
         setPlaceholderScaleType(a.getInt(R.styleable.GukizeView_gkz_placeholderScaleType, SCALE_TYPE_FIT_CENTER));
         setActualScaleType(a.getInt(R.styleable.GukizeView_gkz_actualScaleType, SCALE_TYPE_FIT_CENTER));
         setFailureScaleType(a.getInt(R.styleable.GukizeView_gkz_failureScaleType, SCALE_TYPE_FIT_CENTER));
@@ -138,6 +142,32 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
      */
     public boolean isLoading() {
         return mId != Unikery.INVALID_ID;
+    }
+
+    /**
+     * Set max width of loaded image. It is the max width
+     * of Bitmap, avoid huge image to cause OutOfMemoryError.
+     * But it will not be strictly enforced, the width of
+     * image might a little big then maxImageWidth.
+     * if image height is too big.
+     */
+    public void setMaxImageWidth(int maxImageWidth) {
+        if (maxImageWidth > 0) {
+            mMaxImageWidth = maxImageWidth;
+        }
+    }
+
+    /**
+     * Set max height of loaded image. It is the max height
+     * of Bitmap, avoid huge image to cause OutOfMemoryError.
+     * But it will not be strictly enforced, the height of
+     * image might a little big then maxImageHeight
+     * if image width is too big.
+     */
+    public void setMaxImageHeight(int maxImageHeight) {
+        if (maxImageHeight > 0) {
+            mMaxImageHeight = maxImageHeight;
+        }
     }
 
     /**
@@ -426,11 +456,21 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             return;
         }
 
-        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, 1));
+        final int width = value.getWidth();
+        final int height = value.getHeight();
+        int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
+        // Ratio can't be bigger then width or height.
+        // It will make width or height of Bitmap zero.
+        ratio = Math.min(Math.min(ratio, width), height);
+        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, ratio));
         // Auto start
         imageDrawable.start();
         final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
+    }
+
+    private static int ceilDivide(int a, int b) {
+        return (a + b - 1) / b;
     }
 
     @Override
