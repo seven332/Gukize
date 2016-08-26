@@ -340,7 +340,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     @NonNull
     protected Drawable wrapDrawable(@NonNull Drawable drawable, @Conaco.Source int source) {
         final boolean animated = drawable instanceof ImageDrawable
-                && ((ImageDrawable) drawable).getImageBitmap().isAnimated();
+                && ((ImageDrawable) drawable).isAnimated();
         if (source != Conaco.SOURCE_MEMORY && !animated) {
             final Drawable[] layers = new Drawable[2];
             layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);
@@ -390,7 +390,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         // Release old loaded image drawable
         final ImageDrawable oldImageDrawable = getLoadedImageDrawable();
         if (oldImageDrawable != null) {
-            oldImageDrawable.getImageBitmap().recycle();
+            oldImageDrawable.recycle();
         }
 
         if (mDrawableState != drawableState) {

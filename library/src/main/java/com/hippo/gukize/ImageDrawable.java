@@ -49,8 +49,12 @@ class ImageDrawable extends Drawable implements Animatable, Runnable {
         mPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
     }
 
-    public ImageBitmap getImageBitmap() {
-        return mImageBitmap;
+    public void recycle() {
+        mImageBitmap.recycle();
+    }
+
+    public boolean isAnimated() {
+        return mImageBitmap.isAnimated();
     }
 
     @Override
