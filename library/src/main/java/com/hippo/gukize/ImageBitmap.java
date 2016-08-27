@@ -21,6 +21,8 @@ package com.hippo.gukize;
  */
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -35,7 +37,12 @@ class ImageBitmap {
 
     private static final String LOG_TAG = ImageBitmap.class.getSimpleName();
 
+    private final int mSX;
+    private final int mSY;
+    private final int mSWidth;
+    private final int mSHeight;
     private final int mRatio;
+
     private final int mWidth;
     private final int mHeight;
     private final int mFormat;
@@ -54,21 +61,32 @@ class ImageBitmap {
      * ratio <= width && ratio <= height, or throw
      * IllegalStateException.
      */
-    public ImageBitmap(ImageData imageData, int ratio) {
+    public ImageBitmap(ImageData imageData, Rect rect, int ratio) {
         // Only completed image supported
         if (!imageData.isCompleted()) {
             throw new IllegalStateException("ImageBitmap can only handle completed ImageData");
         }
 
-        final int width = imageData.getWidth();
-        final int height = imageData.getHeight();
-        if (ratio > width || ratio > height) {
+        if (rect == null || rect.isEmpty()) {
+            mSX = 0;
+            mSY = 0;
+            mSWidth = imageData.getWidth();
+            mSHeight = imageData.getHeight();
+        } else {
+            mSX = rect.left;
+            mSY = rect.top;
+            mSWidth = rect.width();
+            mSHeight = rect.height();
+        }
+
+        // Check ration invalid
+        if (ratio > mSWidth || ratio > mSHeight) {
             throw new IllegalStateException("Ratio is too big");
         }
 
         mRatio = ratio;
-        mWidth = width / ratio;
-        mHeight = height / ratio;
+        mWidth = mSWidth / ratio;
+        mHeight = mSHeight / ratio;
         mFormat = imageData.getFormat();
         mOpaque = imageData.isOpaque();
         mFrameCount = imageData.getFrameCount();
@@ -94,7 +112,7 @@ class ImageBitmap {
         // Render first frame
         final ImageRenderer imageRenderer = imageData.createImageRenderer();
         imageRenderer.reset();
-        imageRenderer.render(mBitmap, 0, 0, 0, 0, width, height, ratio, false, 0);
+        imageRenderer.render(mBitmap, 0, 0, mSX, mSY, mSWidth, mSHeight, ratio, true, Color.TRANSPARENT);
 
         if (mFrameCount == 1) {
             // Recycle image renderer if it is not animated
@@ -143,7 +161,7 @@ class ImageBitmap {
     public void reset() {
         if (mBitmap != null && mImageRenderer != null) {
             mImageRenderer.reset();
-            mImageRenderer.render(mBitmap, 0, 0, 0, 0, mWidth, mHeight, mRatio, false, 0);
+            mImageRenderer.render(mBitmap, 0, 0, mSX, mSY, mSWidth, mSHeight, mRatio, true, Color.TRANSPARENT);
         }
     }
 
@@ -153,7 +171,7 @@ class ImageBitmap {
     public void advance() {
         if (mBitmap != null && mImageRenderer != null) {
             mImageRenderer.advance();
-            mImageRenderer.render(mBitmap, 0, 0, 0, 0, mWidth, mHeight, mRatio, false, 0);
+            mImageRenderer.render(mBitmap, 0, 0, mSX, mSY, mSWidth, mSHeight, mRatio, true, Color.TRANSPARENT);
         }
     }
 

@@ -23,6 +23,7 @@ package com.hippo.gukize;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -84,6 +85,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     private int mRetryType = RETRY_TYPE_NONE;
     private int mMaxImageWidth = Integer.MAX_VALUE;
     private int mMaxImageHeight = Integer.MAX_VALUE;
+    private Rect mClipRect;
     @ScaleType
     private int mPlaceholderScaleType = SCALE_TYPE_FIT_CENTER;
     @ScaleType
@@ -167,6 +169,23 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     public void setMaxImageHeight(int maxImageHeight) {
         if (maxImageHeight > 0) {
             mMaxImageHeight = maxImageHeight;
+        }
+    }
+
+    /**
+     * Set clip rect of loaded image. Null or empty rect
+     * to cancel clip.
+     */
+    public void setClipRect(Rect rect) {
+        if (rect == null || rect.isEmpty()) {
+            if (mClipRect != null) {
+                mClipRect.setEmpty();
+            }
+        } else {
+            if (mClipRect == null) {
+                mClipRect = new Rect();
+            }
+            mClipRect.set(rect);
         }
     }
 
@@ -456,13 +475,21 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             return;
         }
 
-        final int width = value.getWidth();
-        final int height = value.getHeight();
+        final int width;
+        final int height;
+        final Rect clipRect = mClipRect;
+        if (clipRect == null || clipRect.isEmpty()) {
+            width = value.getWidth();
+            height = value.getHeight();
+        } else {
+            width = clipRect.width();
+            height = clipRect.height();
+        }
         int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
         // Ratio can't be bigger then width or height.
         // It will make width or height of Bitmap zero.
         ratio = Math.min(Math.min(ratio, width), height);
-        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, ratio));
+        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, clipRect, ratio));
         // Auto start
         imageDrawable.start();
         final Drawable drawable = wrapDrawable(imageDrawable, source);
