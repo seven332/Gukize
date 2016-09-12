@@ -79,14 +79,9 @@ class ImageBitmap {
             mSHeight = rect.height();
         }
 
-        // Check ration invalid
-        if (ratio > mSWidth || ratio > mSHeight) {
-            throw new IllegalStateException("Ratio is too big");
-        }
-
         mRatio = ratio;
-        mWidth = mSWidth / ratio;
-        mHeight = mSHeight / ratio;
+        mWidth = Math.max(1, mSWidth / ratio); // Avoid 0
+        mHeight = Math.max(1, mSHeight / ratio); // Avoid 0
         mFormat = imageData.getFormat();
         mOpaque = imageData.isOpaque();
         mFrameCount = imageData.getFrameCount();

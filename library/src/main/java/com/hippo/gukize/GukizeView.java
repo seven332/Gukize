@@ -485,10 +485,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             width = clipRect.width();
             height = clipRect.height();
         }
-        int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
-        // Ratio can't be bigger then width or height.
-        // It will make width or height of Bitmap zero.
-        ratio = Math.min(Math.min(ratio, width), height);
+        final int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
         final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, clipRect, ratio));
         // Auto start
         imageDrawable.start();
