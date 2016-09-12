@@ -58,7 +58,11 @@ public class Gukize {
         public ImageData decode(@NonNull InputStreamPipe isPipe) {
             try {
                 isPipe.obtain();
-                return Image.decode(isPipe.open(), false);
+                final ImageData data = Image.decode(isPipe.open(), false);
+                if (data != null) {
+                    data.setBrowserCompat(true);
+                }
+                return data;
             } catch (IOException e) {
                 return null;
             } finally {
