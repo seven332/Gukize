@@ -23,6 +23,7 @@
             <enum name="click" value="1"/>
             <enum name="longClick" value="2"/>
         </attr>
+        <attr name="gkz_autoStart" format="boolean"/>
         <attr name="gkz_maxImageWidth" format="dimension"/>
         <attr name="gkz_maxImageHeight" format="dimension"/>
         <attr name="gkz_placeholderDrawable" format="reference"/>

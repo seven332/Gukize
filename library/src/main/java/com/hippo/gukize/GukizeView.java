@@ -83,6 +83,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @RetryType
     private int mRetryType = RETRY_TYPE_NONE;
+    private boolean mAutoStart = true;
     private int mMaxImageWidth = Integer.MAX_VALUE;
     private int mMaxImageHeight = Integer.MAX_VALUE;
     private Rect mClipRect;
@@ -119,6 +120,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         final TypedArray a = context.obtainStyledAttributes(
                 attrs, R.styleable.GukizeView, defStyleAttr, defStyleRes);
         setRetryType(a.getInt(R.styleable.GukizeView_gkz_retryType, RETRY_TYPE_NONE));
+        setAutoStart(a.getBoolean(R.styleable.GukizeView_gkz_autoStart, true));
         setMaxImageWidth(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageWidth, Integer.MAX_VALUE));
         setMaxImageHeight(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageHeight, Integer.MAX_VALUE));
         setPlaceholderScaleType(a.getInt(R.styleable.GukizeView_gkz_placeholderScaleType, SCALE_TYPE_FIT_CENTER));
@@ -144,6 +146,20 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
      */
     public boolean isLoading() {
         return mId != Unikery.INVALID_ID;
+    }
+
+    /**
+     * Set whether auto start animated image.
+     */
+    public void setAutoStart(boolean autoStart) {
+        if (mAutoStart != autoStart) {
+            mAutoStart = autoStart;
+
+            final ImageDrawable drawable;
+            if (autoStart && (drawable = getLoadedImageDrawable()) != null && !drawable.isRunning()) {
+                drawable.start();
+            }
+        }
     }
 
     /**
@@ -487,8 +503,9 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         }
         final int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
         final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, clipRect, ratio));
-        // Auto start
-        imageDrawable.start();
+        if (mAutoStart) {
+            imageDrawable.start();
+        }
         final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
     }
