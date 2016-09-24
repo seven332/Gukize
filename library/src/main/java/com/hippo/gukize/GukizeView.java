@@ -328,7 +328,14 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
                 && ((IBDrawable) drawable).isAnimated();
         if (source != Conaco.SOURCE_MEMORY && !animated) {
             final Drawable[] layers = new Drawable[2];
-            layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);
+            final Drawable firstDrawable;
+            if (mPlaceholderDrawable != null && mPlaceholderDrawable.getIntrinsicWidth() == -1 &&
+                    mPlaceholderDrawable.getIntrinsicHeight() == -1) {
+                firstDrawable = mPlaceholderDrawable;
+            } else {
+                firstDrawable = new ColorDrawable(Color.TRANSPARENT);
+            }
+            layers[0] = firstDrawable;
             layers[1] = drawable;
             final TransitionDrawable newDrawable = new TransitionDrawable(layers);
             newDrawable.startTransition(TIME_TRANSITION);
