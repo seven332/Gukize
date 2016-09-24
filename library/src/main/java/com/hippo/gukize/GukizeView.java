@@ -23,7 +23,6 @@ package com.hippo.gukize;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -38,13 +37,12 @@ import com.hippo.conaco.Conaco;
 import com.hippo.conaco.ConacoTask;
 import com.hippo.conaco.DataContainer;
 import com.hippo.conaco.Unikery;
-import com.hippo.image.ImageData;
 import com.hippo.konwidget.AdvImageView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-public class GukizeView extends AdvImageView implements Unikery<ImageData>,
+public class GukizeView extends AdvImageView implements Unikery<IBData>,
         View.OnClickListener, View.OnLongClickListener, Animatable {
 
     @IntDef({DRAWABLE_NONE, DRAWABLE_PLACEHOLDER, DRAWABLE_LOAD,
@@ -70,7 +68,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     private int mId = Unikery.INVALID_ID;
 
-    private Conaco<ImageData> mConaco;
+    private Conaco<IBData> mConaco;
 
     private String mKey;
     private String mUrl;
@@ -84,9 +82,6 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     @RetryType
     private int mRetryType = RETRY_TYPE_NONE;
     private boolean mAutoStart = true;
-    private int mMaxImageWidth = Integer.MAX_VALUE;
-    private int mMaxImageHeight = Integer.MAX_VALUE;
-    private Rect mClipRect;
     @ScaleType
     private int mPlaceholderScaleType = SCALE_TYPE_FIT_CENTER;
     @ScaleType
@@ -121,8 +116,6 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
                 attrs, R.styleable.GukizeView, defStyleAttr, defStyleRes);
         setRetryType(a.getInt(R.styleable.GukizeView_gkz_retryType, RETRY_TYPE_NONE));
         setAutoStart(a.getBoolean(R.styleable.GukizeView_gkz_autoStart, true));
-        setMaxImageWidth(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageWidth, Integer.MAX_VALUE));
-        setMaxImageHeight(a.getDimensionPixelSize(R.styleable.GukizeView_gkz_maxImageHeight, Integer.MAX_VALUE));
         setPlaceholderScaleType(a.getInt(R.styleable.GukizeView_gkz_placeholderScaleType, SCALE_TYPE_FIT_CENTER));
         setActualScaleType(a.getInt(R.styleable.GukizeView_gkz_actualScaleType, SCALE_TYPE_FIT_CENTER));
         setFailureScaleType(a.getInt(R.styleable.GukizeView_gkz_failureScaleType, SCALE_TYPE_FIT_CENTER));
@@ -155,53 +148,10 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         if (mAutoStart != autoStart) {
             mAutoStart = autoStart;
 
-            final ImageDrawable drawable;
+            final IBDrawable drawable;
             if (autoStart && (drawable = getLoadedImageDrawable()) != null && !drawable.isRunning()) {
                 drawable.start();
             }
-        }
-    }
-
-    /**
-     * Set max width of loaded image. It is the max width
-     * of Bitmap, avoid huge image to cause OutOfMemoryError.
-     * But it will not be strictly enforced, the width of
-     * image might a little big then maxImageWidth.
-     * if image height is too big.
-     */
-    public void setMaxImageWidth(int maxImageWidth) {
-        if (maxImageWidth > 0) {
-            mMaxImageWidth = maxImageWidth;
-        }
-    }
-
-    /**
-     * Set max height of loaded image. It is the max height
-     * of Bitmap, avoid huge image to cause OutOfMemoryError.
-     * But it will not be strictly enforced, the height of
-     * image might a little big then maxImageHeight
-     * if image width is too big.
-     */
-    public void setMaxImageHeight(int maxImageHeight) {
-        if (maxImageHeight > 0) {
-            mMaxImageHeight = maxImageHeight;
-        }
-    }
-
-    /**
-     * Set clip rect of loaded image. Null or empty rect
-     * to cancel clip.
-     */
-    public void setClipRect(Rect rect) {
-        if (rect == null || rect.isEmpty()) {
-            if (mClipRect != null) {
-                mClipRect.setEmpty();
-            }
-        } else {
-            if (mClipRect == null) {
-                mClipRect = new Rect();
-            }
-            mClipRect.set(rect);
         }
     }
 
@@ -326,7 +276,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         mHasData = true;
 
         if (ViewCompat.isAttachedToWindow(this)) {
-            final ConacoTask.Builder<ImageData> builder = new ConacoTask.Builder<>();
+            final ConacoTask.Builder<IBData> builder = new ConacoTask.Builder<>();
             builder.unikery = this;
             builder.key = key;
             builder.url = url;
@@ -374,8 +324,8 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
      */
     @NonNull
     protected Drawable wrapDrawable(@NonNull Drawable drawable, @Conaco.Source int source) {
-        final boolean animated = drawable instanceof ImageDrawable
-                && ((ImageDrawable) drawable).isAnimated();
+        final boolean animated = drawable instanceof IBDrawable
+                && ((IBDrawable) drawable).isAnimated();
         if (source != Conaco.SOURCE_MEMORY && !animated) {
             final Drawable[] layers = new Drawable[2];
             layers[0] = mPlaceholderDrawable != null ? mPlaceholderDrawable : new ColorDrawable(Color.TRANSPARENT);
@@ -402,12 +352,12 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         return drawable;
     }
 
-    private ImageDrawable getLoadedImageDrawable() {
+    private IBDrawable getLoadedImageDrawable() {
         Drawable drawable;
         if (mDrawableState == DRAWABLE_LOAD && (drawable = getDrawable()) != null) {
             drawable = unwrapDrawable(drawable);
-            if (drawable instanceof ImageDrawable) {
-                return (ImageDrawable) drawable;
+            if (drawable instanceof IBDrawable) {
+                return (IBDrawable) drawable;
             } else {
                 throw new IllegalStateException("unwrapDrawable() must return ImageDrawable, " +
                         "but it is " + drawable.getClass().getName());
@@ -423,7 +373,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
         }
 
         // Release old loaded image drawable
-        final ImageDrawable oldImageDrawable = getLoadedImageDrawable();
+        final IBDrawable oldImageDrawable = getLoadedImageDrawable();
         if (oldImageDrawable != null) {
             oldImageDrawable.recycle();
         }
@@ -473,17 +423,17 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
     }
 
     @Override
-    public void onGetValue(@NonNull ImageData value, @Conaco.Source int source) {
-        // The ImageData might be recycled, but it's small probability event.
+    public void onGetValue(@NonNull IBData value, @Conaco.Source int source) {
+        // The IBData might be recycled, but it's small probability event.
         if (value.isRecycled()) {
             onFailure();
             return;
         }
 
-        // We use onDetachedFromWindow to handle ImageData recycle.
-        // So can't use ImageData when detached from window.
+        // We use onDetachedFromWindow to handle IBData recycle.
+        // So can't use IBData when detached from window.
         if (!ViewCompat.isAttachedToWindow(this)) {
-            // If ImageData is not referenced, it must be not in memory cache.
+            // If IBData is not referenced, it must be not in memory cache.
             // Recycle it now to avoid memory leak.
             if (!value.isReferenced()) {
                 value.recycle();
@@ -491,27 +441,12 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
             return;
         }
 
-        final int width;
-        final int height;
-        final Rect clipRect = mClipRect;
-        if (clipRect == null || clipRect.isEmpty()) {
-            width = value.getWidth();
-            height = value.getHeight();
-        } else {
-            width = clipRect.width();
-            height = clipRect.height();
-        }
-        final int ratio = Math.max(Math.max(ceilDivide(width, mMaxImageWidth), ceilDivide(height, mMaxImageHeight)), 1);
-        final ImageDrawable imageDrawable = new ImageDrawable(new ImageBitmap(value, clipRect, ratio));
+        final IBDrawable imageDrawable = new IBDrawable(value.createRenderer());
         if (mAutoStart) {
             imageDrawable.start();
         }
         final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
-    }
-
-    private static int ceilDivide(int a, int b) {
-        return (a + b - 1) / b;
     }
 
     @Override
@@ -527,7 +462,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public void start() {
-        final ImageDrawable drawable = getLoadedImageDrawable();
+        final IBDrawable drawable = getLoadedImageDrawable();
         if (drawable != null) {
             drawable.start();
         }
@@ -535,7 +470,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public void stop() {
-        final ImageDrawable drawable = getLoadedImageDrawable();
+        final IBDrawable drawable = getLoadedImageDrawable();
         if (drawable != null) {
             drawable.stop();
         }
@@ -543,7 +478,7 @@ public class GukizeView extends AdvImageView implements Unikery<ImageData>,
 
     @Override
     public boolean isRunning() {
-        final ImageDrawable drawable = getLoadedImageDrawable();
+        final IBDrawable drawable = getLoadedImageDrawable();
         return drawable != null && drawable.isRunning();
     }
 
