@@ -184,7 +184,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
     }
 
     // Task keeps till recycled
-    private class Task extends AsyncTask<Void, Boolean, Void> {
+    private class Task extends AsyncTask<Void, Long, Void> {
 
         private static final int RESET = 0;
         private static final int RESET_ANIMATE = 1;
@@ -194,6 +194,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
 
         private boolean mRecycled;
         private final Deque<Integer> mTaskStack = new LinkedList<>();
+        private final Deque<Long> mTimeStack = new LinkedList<>();
         private final Lock mThreadLock = new ReentrantLock();
         private final Object mWaitLock = new Object();
 
@@ -208,6 +209,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
                 mRecycled = true;
             }
             mTaskStack.addLast(task);
+            mTimeStack.addLast(SystemClock.uptimeMillis());
 
             synchronized (mWaitLock) {
                 mWaitLock.notify();
@@ -225,6 +227,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
             for (;;) {
                 mThreadLock.lock();
                 final Integer task = mTaskStack.pollFirst();
+                final Long time = mTimeStack.pollFirst();
                 if (task == null) {
                     mThreadLock.unlock();
                     synchronized (mWaitLock) {
@@ -242,19 +245,19 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
                 switch (task) {
                     case RESET:
                         mIBRenderer.reset();
-                        publishProgress(false);
+                        publishProgress((Long) null);
                         break;
                     case RESET_ANIMATE:
                         mIBRenderer.reset();
-                        publishProgress(true);
+                        publishProgress(time);
                         break;
                     case ADVANCE:
                         mIBRenderer.advance();
-                        publishProgress(false);
+                        publishProgress((Long) null);
                         break;
                     case ADVANCE_ANIMATE:
                         mIBRenderer.advance();
-                        publishProgress(true);
+                        publishProgress(time);
                         break;
                     case RECYCLE:
                         // mIBRenderer will be recycled in onPostExecute(),
@@ -267,10 +270,11 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
         }
 
         @Override
-        protected void onProgressUpdate(Boolean... values) {
+        protected void onProgressUpdate(Long... values) {
             invalidateSelf();
-            if (values[0]) {
-                scheduleSelf(IBDrawable.this, SystemClock.uptimeMillis() + mIBRenderer.getCurrentDelay());
+            final Long time = values[0];
+            if (time != null) {
+                scheduleSelf(IBDrawable.this, time + mIBRenderer.getCurrentDelay());
             }
         }
 
