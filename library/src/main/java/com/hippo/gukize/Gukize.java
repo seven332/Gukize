@@ -46,6 +46,7 @@ public class Gukize {
             throw new IllegalStateException("Can't init Gukize twice");
         }
         builder.isValid();
+        IBDrawable.init(builder.coreAnimatedThreadCount);
         sConaco = builder.build();
     }
 
@@ -144,6 +145,12 @@ public class Gukize {
     }
 
     public static class Builder extends Conaco.Builder<IBData> {
+
+        /**
+         * The core thread count for animated image.
+         * 0 ~ 3 is fine. More animated image for large number.
+         */
+        public int coreAnimatedThreadCount = 0;
 
         public Builder() {
             objectHelper = new ImageDataHelper();

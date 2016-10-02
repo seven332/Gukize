@@ -47,12 +47,16 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
 
     private static final String LOG_TAG = IBDrawable.class.getSimpleName();
 
-    private static final Executor sExecutor = new InfiniteThreadExecutor(
-            3, // Keep 3 core thread
-            3000, // 3000ms
-            new LinkedList<Runnable>(),
-            new PriorityThreadFactory(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND)
-    );
+    private static Executor sExecutor;
+
+    static void init(int coreThreadCount) {
+        sExecutor = new InfiniteThreadExecutor(
+                coreThreadCount,
+                3000, // 3000ms
+                new LinkedList<Runnable>(),
+                new PriorityThreadFactory(LOG_TAG, Process.THREAD_PRIORITY_BACKGROUND)
+        );
+    }
 
     private final IBRenderer mIBRenderer;
     private final Paint mPaint;
@@ -66,6 +70,9 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
     private boolean mAnimating;
 
     public IBDrawable(@NonNull IBRenderer ibRenderer) {
+        if (sExecutor == null) {
+            throw new IllegalStateException("Please init Gukize first.");
+        }
         mIBRenderer = ibRenderer;
         mPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
         if (ibRenderer.isAnimated()) {
