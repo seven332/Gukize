@@ -31,6 +31,7 @@ import android.os.AsyncTask;
 import android.os.Process;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.hippo.yorozuya.thread.InfiniteThreadExecutor;
 import com.hippo.yorozuya.thread.PriorityThreadFactory;
@@ -38,8 +39,6 @@ import com.hippo.yorozuya.thread.PriorityThreadFactory;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.concurrent.Executor;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A drawable to draw {@link IBRenderer}.
@@ -57,6 +56,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
 
     private final IBRenderer mIBRenderer;
     private final Paint mPaint;
+    @Nullable
     private final Task mTask;
 
     /** Whether the drawable has an animation callback posted. */
@@ -68,12 +68,20 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
     public IBDrawable(@NonNull IBRenderer ibRenderer) {
         mIBRenderer = ibRenderer;
         mPaint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.DITHER_FLAG);
-        mTask = new Task();
-        mTask.executeOnExecutor(sExecutor);
+        if (ibRenderer.isAnimated()) {
+            mTask = new Task();
+            mTask.executeOnExecutor(sExecutor);
+        } else {
+            mTask = null;
+        }
     }
 
     public void recycle() {
-        mTask.addTask(Task.RECYCLE);
+        if (mTask == null) {
+            mIBRenderer.recycle();
+        } else {
+            mTask.addTask(Task.RECYCLE);
+        }
     }
 
     public boolean isAnimated() {
@@ -128,7 +136,7 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
     // resetOrNext, false for reset, true for next
     private void setFrame(boolean resetOrNext, boolean animate) {
         // Check recycled
-        if (mTask.isRecycled() || mIBRenderer.isRecycled()) {
+        if (mTask == null || mTask.isRecycled() || mIBRenderer.isRecycled()) {
             return;
         }
 
@@ -195,27 +203,22 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
         private boolean mRecycled;
         private final Deque<Integer> mTaskStack = new LinkedList<>();
         private final Deque<Long> mTimeStack = new LinkedList<>();
-        private final Lock mThreadLock = new ReentrantLock();
-        private final Object mWaitLock = new Object();
+        private final Object mLock = new Object();
 
         public void addTask(int task) {
-            mThreadLock.lock();
-
             if (mRecycled) {
                 return;
             }
-            if (task == RECYCLE) {
-                mTaskStack.clear();
-                mRecycled = true;
-            }
-            mTaskStack.addLast(task);
-            mTimeStack.addLast(SystemClock.uptimeMillis());
 
-            synchronized (mWaitLock) {
-                mWaitLock.notify();
+            synchronized (mLock) {
+                if (task == RECYCLE) {
+                    mTaskStack.clear();
+                    mRecycled = true;
+                }
+                mTaskStack.addLast(task);
+                mTimeStack.addLast(SystemClock.uptimeMillis());
+                mLock.notify();
             }
-
-            mThreadLock.unlock();
         }
 
         public boolean isRecycled() {
@@ -225,21 +228,19 @@ class IBDrawable extends Drawable implements Animatable, Runnable {
         @Override
         protected Void doInBackground(Void... params) {
             for (;;) {
-                mThreadLock.lock();
-                final Integer task = mTaskStack.pollFirst();
-                final Long time = mTimeStack.pollFirst();
-                if (task == null) {
-                    mThreadLock.unlock();
-                    synchronized (mWaitLock) {
+                final Integer task;
+                final Long time;
+                synchronized (mLock) {
+                    task = mTaskStack.pollFirst();
+                    time = mTimeStack.pollFirst();
+                    if (task == null) {
                         try {
-                            mWaitLock.wait();
+                            mLock.wait();
                         } catch (InterruptedException e) {
                             // Ignore
                         }
+                        continue;
                     }
-                    continue;
-                } else {
-                    mThreadLock.unlock();
                 }
 
                 switch (task) {
