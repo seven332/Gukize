@@ -25,6 +25,7 @@ import android.os.Debug;
 import android.util.Log;
 
 import com.hippo.gukize.Gukize;
+import com.hippo.image.Image;
 import com.hippo.yorozuya.FileUtils;
 import com.hippo.yorozuya.OSUtils;
 import com.hippo.yorozuya.SimpleHandler;
@@ -47,7 +48,7 @@ public class GukizeApplication extends Application {
         builder.diskCacheDir = new File(getCacheDir(), "thumb");
         builder.diskCacheMaxSize = 80 * 1024 * 1024; // 80MB
         builder.okHttpClient = new OkHttpClient.Builder().build();
-        builder.debug = true;
+        builder.debug = false;
         Gukize.init(builder);
 
         debugPrint();
@@ -57,9 +58,12 @@ public class GukizeApplication extends Application {
         new Runnable() {
             @Override
             public void run() {
+                Log.i(TAG, "==================================");
                 Log.i(TAG, "Java memory: " + FileUtils.readableByteCount(OSUtils.getAppAllocatedMemory(), false));
                 Log.i(TAG, "Native memory: " + FileUtils.readableByteCount(Debug.getNativeHeapAllocatedSize(), false));
-                SimpleHandler.getInstance().postDelayed(this, 2000);
+                Log.i(TAG, "ImageData: " + Image.getImageDataCount());
+                Log.i(TAG, "ImageRenderer: " + Image.getImageRendererCount());
+                SimpleHandler.getInstance().postDelayed(this, 5000);
             }
         }.run();
     }

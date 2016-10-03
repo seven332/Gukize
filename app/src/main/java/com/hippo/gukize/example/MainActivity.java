@@ -16,91 +16,40 @@
 
 package com.hippo.gukize.example;
 
-import android.content.res.Resources;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.hippo.gukize.GukizeView;
-import com.hippo.konwidget.AdvImageView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String URL_JPEG = "https://www.gstatic.com/webp/gallery/1.sm.jpg";
-    private static final String URL_PNG = "https://upload.wikimedia.org/wikipedia/commons/d/d9/Test.png";
-    private static final String URL_GIF = "https://s3.amazonaws.com/giphygifs/media/4aBQ9oNjgEQ2k/giphy.gif";
-    private static final String URL_BAD = "https://sdarea.com/safrreedtger.jpg";
+    private static final String[] LIST = {"Simple", "Large", "Large Pager"};
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ListView listView = (ListView) findViewById(R.id.list_view);
-        listView.setAdapter(new BaseAdapter() {
+        listView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, LIST));
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public int getCount() {
-                return 1000;
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return 0;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                GukizeView image;
-                if (convertView == null) {
-                    convertView = new GukizeView(MainActivity.this);
-                    Resources resources = getResources();
-                    image = (GukizeView) convertView;
-                    image.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 512));
-                    image.setPlaceholderDrawable(resources.getDrawable(R.drawable.placeholder));
-                    image.setFailureDrawable(resources.getDrawable(R.drawable.failure));
-                    image.setRetryType(GukizeView.RETRY_TYPE_CLICK);
-                } else {
-                    image = (GukizeView) convertView;
-                }
-
-                switch (position % 5) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
                     case 0:
-                        image.load("jpeg", URL_JPEG);
+                        startActivity(new Intent(MainActivity.this, SimpleActivity.class));
                         break;
                     case 1:
-                        image.load("png", URL_PNG);
+                        startActivity(new Intent(MainActivity.this, LargeActivity.class));
                         break;
                     case 2:
-                        image.load("gif", URL_GIF);
-                        break;
-                    case 3:
-                        image.load("gif", URL_GIF);
-                        break;
-                    case 4:
-                        image.load("bad", URL_BAD);
+                        startActivity(new Intent(MainActivity.this, LargePagerActivity.class));
                         break;
                 }
-
-                switch (position % 2) {
-                    case 0:
-                        image.setActualScaleType(AdvImageView.SCALE_TYPE_CENTER);
-                        image.setFailureScaleType(AdvImageView.SCALE_TYPE_FIT_XY);
-                        break;
-                    case 1:
-                        image.setActualScaleType(AdvImageView.SCALE_TYPE_FIT_XY);
-                        image.setFailureScaleType(AdvImageView.SCALE_TYPE_CENTER);
-                        break;
-                }
-
-                return convertView;
             }
         });
     }
