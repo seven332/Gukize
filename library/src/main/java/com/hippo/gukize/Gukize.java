@@ -153,7 +153,7 @@ public class Gukize {
         public int coreAnimatedThreadCount = 0;
 
         public Builder() {
-            objectHelper = new ImageDataHelper();
+            valueHelper = new ImageDataHelper();
         }
 
         @Override
@@ -162,7 +162,7 @@ public class Gukize {
             if (!hasMemoryCache) {
                 throw new IllegalStateException("Gukize must support memory cache");
             }
-            if (!(objectHelper instanceof ImageDataHelper)) {
+            if (!(valueHelper instanceof ImageDataHelper)) {
                 throw new IllegalStateException("Don't assign objectHelper");
             }
         }

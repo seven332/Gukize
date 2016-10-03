@@ -38,6 +38,7 @@ import com.hippo.conaco.ConacoTask;
 import com.hippo.conaco.DataContainer;
 import com.hippo.conaco.Unikery;
 import com.hippo.konwidget.AdvImageView;
+import com.hippo.streampipe.InputStreamPipe;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -454,6 +455,11 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
         }
         final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
+    }
+
+    @Override
+    public void onGetPipe(@NonNull InputStreamPipe pipe) {
+        throw new IllegalStateException("Not support onGetPipe.");
     }
 
     @Override
