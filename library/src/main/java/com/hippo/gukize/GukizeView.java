@@ -137,7 +137,7 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
         return mId;
     }
 
-    private void setListener(Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 

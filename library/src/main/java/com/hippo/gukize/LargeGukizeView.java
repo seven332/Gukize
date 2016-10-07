@@ -68,7 +68,7 @@ public class LargeGukizeView extends LargeImageView implements Unikery<IBData>,
         setImageInitListener(this);
     }
 
-    private void setListener(Listener listener) {
+    public void setListener(Listener listener) {
         mListener = listener;
     }
 
