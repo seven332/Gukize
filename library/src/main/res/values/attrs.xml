@@ -24,6 +24,7 @@
             <enum name="longClick" value="2"/>
         </attr>
         <attr name="gkz_autoStart" format="boolean"/>
+        <attr name="gkz_showFadeAnimation" format="boolean"/>
         <attr name="gkz_placeholderDrawable" format="reference"/>
         <attr name="gkz_placeholderScaleType">
             <enum name="fitXY" value="1"/>

@@ -83,6 +83,7 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     @RetryType
     private int mRetryType = RETRY_TYPE_NONE;
     private boolean mAutoStart = true;
+    private boolean mShowFadeAnimation = true;
     @ScaleType
     private int mPlaceholderScaleType = SCALE_TYPE_FIT_CENTER;
     @ScaleType
@@ -119,6 +120,7 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
                 attrs, R.styleable.GukizeView, defStyleAttr, defStyleRes);
         setRetryType(a.getInt(R.styleable.GukizeView_gkz_retryType, RETRY_TYPE_NONE));
         setAutoStart(a.getBoolean(R.styleable.GukizeView_gkz_autoStart, true));
+        setShowFadeAnimation(a.getBoolean(R.styleable.GukizeView_gkz_showFadeAnimation, true));
         setPlaceholderScaleType(a.getInt(R.styleable.GukizeView_gkz_placeholderScaleType, SCALE_TYPE_FIT_CENTER));
         setActualScaleType(a.getInt(R.styleable.GukizeView_gkz_actualScaleType, SCALE_TYPE_FIT_CENTER));
         setFailureScaleType(a.getInt(R.styleable.GukizeView_gkz_failureScaleType, SCALE_TYPE_FIT_CENTER));
@@ -160,6 +162,13 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
                 drawable.start();
             }
         }
+    }
+
+    /**
+     * Set whether show fade animation.
+     */
+    public void setShowFadeAnimation(boolean showFadeAnimation) {
+        mShowFadeAnimation = showFadeAnimation;
     }
 
     /**
@@ -337,7 +346,7 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     protected Drawable wrapDrawable(@NonNull Drawable drawable, @Conaco.Source int source) {
         final boolean animated = drawable instanceof IBDrawable
                 && ((IBDrawable) drawable).isAnimated();
-        if (source != Conaco.SOURCE_MEMORY && !animated) {
+        if (mShowFadeAnimation && source != Conaco.SOURCE_MEMORY && !animated) {
             final Drawable[] layers = new Drawable[2];
             final Drawable firstDrawable;
             if (mPlaceholderDrawable != null && mPlaceholderDrawable.getIntrinsicWidth() == -1 &&
