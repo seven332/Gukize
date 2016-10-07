@@ -283,6 +283,10 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
         mHasData = true;
 
         if (ViewCompat.isAttachedToWindow(this)) {
+            if (mListener != null) {
+                mListener.onLoad();
+            }
+
             final ConacoTask.Builder<IBData> builder = new ConacoTask.Builder<>();
             builder.unikery = this;
             builder.key = key;
@@ -290,10 +294,6 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
             builder.dataContainer = container;
             builder.useNetwork = useNetwork;
             mConaco.load(builder);
-        }
-
-        if (mListener != null) {
-            mListener.onLoad();
         }
     }
 

@@ -128,6 +128,10 @@ public class LargeGukizeView extends LargeImageView implements Unikery<IBData>,
         mFailOrCancel = false;
 
         if (ViewCompat.isAttachedToWindow(this)) {
+            if (mListener != null) {
+                mListener.onLoad();
+            }
+
             final ConacoTask.Builder<IBData> builder = new ConacoTask.Builder<>();
             builder.unikery = this;
             builder.key = key;
@@ -136,10 +140,6 @@ public class LargeGukizeView extends LargeImageView implements Unikery<IBData>,
             builder.useNetwork = useNetwork;
             builder.skipDecode = true;
             mConaco.load(builder);
-        }
-
-        if (mListener != null) {
-            mListener.onLoad();
         }
     }
 
