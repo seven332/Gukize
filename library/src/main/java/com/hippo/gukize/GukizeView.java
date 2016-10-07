@@ -94,6 +94,8 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     private Drawable mPlaceholderDrawable;
     private Drawable mFailureDrawable;
 
+    private Listener mListener;
+
     public GukizeView(Context context) {
         super(context);
         mConaco = Gukize.getConaco();
@@ -133,6 +135,10 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     @Override
     public int getTaskId() {
         return mId;
+    }
+
+    private void setListener(Listener listener) {
+        mListener = listener;
     }
 
     /**
@@ -284,6 +290,10 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
             builder.dataContainer = container;
             builder.useNetwork = useNetwork;
             mConaco.load(builder);
+        }
+
+        if (mListener != null) {
+            mListener.onLoad();
         }
     }
 
@@ -455,6 +465,10 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
         }
         final Drawable drawable = wrapDrawable(imageDrawable, source);
         setDrawable(drawable, DRAWABLE_LOAD, true);
+
+        if (mListener != null) {
+            mListener.onSuccess();
+        }
     }
 
     @Override
@@ -465,13 +479,25 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     @Override
     public void onFailure() {
         setDrawable(mFailureDrawable, DRAWABLE_FAILURE, false);
+
+        if (mListener != null) {
+            mListener.onFailure();
+        }
     }
 
     @Override
-    public void onCancel() {}
+    public void onCancel() {
+        if (mListener != null) {
+            mListener.onCancel();
+        }
+    }
 
     @Override
-    public void onProgress(long singleReceivedSize, long receivedSize, long totalSize) {}
+    public void onProgress(long singleReceivedSize, long receivedSize, long totalSize) {
+        if (mListener != null) {
+            mListener.onProgress(singleReceivedSize, receivedSize, totalSize);
+        }
+    }
 
     @Override
     public void start() {
@@ -498,6 +524,9 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     @Override
     public void onClick(@NonNull View v) {
         if (mHasData) {
+            if (mListener != null) {
+                mListener.onRetry();
+            }
             load(mKey, mUrl, mContainer, mUseNetwork);
         }
     }
@@ -505,8 +534,20 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     @Override
     public boolean onLongClick(@NonNull View v) {
         if (mHasData) {
+            if (mListener != null) {
+                mListener.onRetry();
+            }
             load(mKey, mUrl, mContainer, mUseNetwork);
         }
         return true;
+    }
+
+    public interface Listener {
+        void onLoad();
+        void onProgress(long singleReceivedSize, long receivedSize, long totalSize);
+        void onSuccess();
+        void onFailure();
+        void onCancel();
+        void onRetry();
     }
 }

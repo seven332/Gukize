@@ -137,6 +137,10 @@ public class LargeGukizeView extends LargeImageView implements Unikery<IBData>,
             builder.skipDecode = true;
             mConaco.load(builder);
         }
+
+        if (mListener != null) {
+            mListener.onLoad();
+        }
     }
 
     @Override
@@ -195,6 +199,7 @@ public class LargeGukizeView extends LargeImageView implements Unikery<IBData>,
     }
 
     public interface Listener {
+        void onLoad();
         void onProgress(long singleReceivedSize, long receivedSize, long totalSize);
         void onSuccess();
         void onFailure();
