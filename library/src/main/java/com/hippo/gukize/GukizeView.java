@@ -31,6 +31,7 @@ import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.hippo.conaco.Conaco;
@@ -45,6 +46,8 @@ import java.lang.annotation.RetentionPolicy;
 
 public class GukizeView extends AdvImageView implements Unikery<IBData>,
         View.OnClickListener, View.OnLongClickListener, Animatable {
+
+    private static final String LOG_TAG = GukizeView.class.getSimpleName();
 
     @IntDef({DRAWABLE_NONE, DRAWABLE_PLACEHOLDER, DRAWABLE_LOAD,
             DRAWABLE_FAILURE, DRAWABLE_CUSTOM})
@@ -453,6 +456,7 @@ public class GukizeView extends AdvImageView implements Unikery<IBData>,
     public void onGetValue(@NonNull IBData value, @Conaco.Source int source) {
         // The IBData might be recycled, but it's small probability event.
         if (value.isRecycled()) {
+            Log.w(LOG_TAG, "IBData is recycled in GukizeView.onGetValue(), need larger memory cache.");
             onFailure();
             return;
         }
