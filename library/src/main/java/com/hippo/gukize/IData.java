@@ -32,6 +32,7 @@ class IData extends IBData {
 
     public IData(@NonNull ImageData imageData) {
         mImageData = imageData;
+        imageData.addReference();
     }
 
     @Override
